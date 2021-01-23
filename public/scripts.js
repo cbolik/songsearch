@@ -182,6 +182,8 @@ const spotifyCheckForCurrentTrack = () => {
     })
       .then((resp) => {
         if (resp.status === 204) {
+          localStorage.setItem(SPOTIFY_USED_KEY, true);
+          setValue("spotify_current", "Get Current");
           return null;
         } else {
           return resp.json();
@@ -203,11 +205,14 @@ const spotifyCheckForCurrentTrack = () => {
           setValue("artist", artist);
           setValue("album", album);
           setYear(releaseYear);
+          setValue("spotify_current", "Get Current");
         }
       });
   } else {
     if (localStorage.getItem(SPOTIFY_USED_KEY)) {
       // Spotify used previously, trying to obtain token
+      localStorage.removeItem(SPOTIFY_USED_KEY); // remove to avoid infinite loop
+      setValue("spotify_current", "Connect");
       spotifyGetAccessToken();
     }
   }
