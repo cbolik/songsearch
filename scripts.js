@@ -152,6 +152,8 @@ const generateRandomString = (length) => {
   return text;
 };
 
+console.log(window.location);
+
 const SPOTIFY_CLIENT_ID = "MmQ3MzQyZjg2MTdmNGVhNmFmMmM4ODRjYTcwZTJiNDA=";
 const SPOTIFY_REDIRECT_URI = window.location.origin;
 const SPOTIFY_STATE_KEY = "spotify_auth_state";
