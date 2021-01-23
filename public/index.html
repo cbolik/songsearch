@@ -1,0 +1,83 @@
+<!--
+  Song Search - A Web App for finding additional information for a given song title, artist, or album.
+  Has optional Spotify integration to obtain the currently playing track.
+
+  (C) 2021 Christian Bolik
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Song Search</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="scripts.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+    integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
+    crossorigin="anonymous" />
+  <!-- third-generation iPad with high-resolution Retina display: -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144"
+    href="icons/music-note-icon-144-155161.png">
+  <!-- iPhone with high-resolution Retina display: -->
+  <link rel="apple-touch-icon-precomposed" sizes="114x114"
+    href="icons/music-note-icon-114-155161.png">
+  <!-- first- and second-generation iPad: -->
+  <link rel="apple-touch-icon-precomposed" sizes="72x72"
+    href="icons/music-note-icon-72-155161.png">
+  <!-- non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
+  <link rel="apple-touch-icon-precomposed" href="icons/music-note-icon-57-155161.png">
+  <!-- basic favicon -->
+  <link rel="shortcut icon" href="icons/music-note-icon-32-155161.png">
+</head>
+<body>
+  <div class="banner">
+    <h1>Song Search</h1>
+    <input type="button" id="reset" onclick="resetFields()" value="Clear" tabindex="-1">
+  </div>
+  <form>
+    <div class="columns">
+      <div class="col col-title"> 
+        <div class="input-combo">
+          <label for="song_title">Song Title: </label>
+          <input type="text" id="title" name="song_title" tabindex="1" autofocus>
+        </div>
+        <input type="button" id="lyrics" onclick="openLyrics()" value="Lyrics">
+        <input type="button" id="wiki_song" onclick="openWikiSong()" value="Wikipedia: Song">
+        <input type="button" id="youtube" onclick="openYouTube()" value="YouTube">
+        <input type="button" id="chords" onclick="openUltimateGuitar()" value="Chords">
+      </div>
+      <div class="col col-artist">
+        <div class="input-combo">
+          <label for="artist">Artist: </label>
+          <input type="text" id="artist" name="artist" tabindex="2">
+        </div>
+        <input type="button" id="wiki_artist" onclick="openWikiArtist()" value="Wikipedia: Artist">
+        <input type="button" id="artist_home" onclick="openHomepage()" value="Homepage">
+      </div>
+      <div class="col col-album">
+        <div class="input-combo">
+          <label for="album">Album: </label>
+          <input type="text" id="album" name="album" tabindex="3">
+          <div class="year-label" id="year"></div>
+        </div>
+        <input type="button" id="wiki_album" onclick="openWikiAlbum()" value="Wikipedia: Album">
+        <input type="button" id="discogs" onclick="openDiscogs()" value="Discogs">
+      </div>
+    </div>
+    <div class="spotify">
+      <a href="https://open.spotify.com" title="Spotify" target="_blank"><i class="fab fa-spotify fa-2x spotify-label"></i></a>
+      <input type="button" id="spotify_search" onclick="spotifySearch()" value="Search">
+      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Get Current">
+    </div>
+  </form>
+
+  <script>
+    // trigger Lyrics button when Enter is pressed
+    document.getElementById("title").addEventListener("keyup", (event) => enterPressed(event));
+    document.getElementById("artist").addEventListener("keyup", (event) => enterPressed(event));
+    document.getElementById("album").addEventListener("keyup", (event) => albumKeyPressed(event));
+
+    spotifyCheckForCurrentTrack();
+  </script>
+</body>
+</html>
