@@ -152,8 +152,6 @@ const generateRandomString = (length) => {
   return text;
 };
 
-console.log(window.location);
-
 const getRedirectURI = (loc) => {
   let uri = loc.origin + loc.pathname;
   return uri.replace(/\/$/, "");
@@ -161,7 +159,6 @@ const getRedirectURI = (loc) => {
 
 const SPOTIFY_CLIENT_ID = "MmQ3MzQyZjg2MTdmNGVhNmFmMmM4ODRjYTcwZTJiNDA=";
 const SPOTIFY_REDIRECT_URI = getRedirectURI(window.location);
-console.log(SPOTIFY_REDIRECT_URI);
 const SPOTIFY_STATE_KEY = "spotify_auth_state";
 const SPOTIFY_USED_KEY = "spotify_used";
 
@@ -184,7 +181,6 @@ const spotifyCheckForCurrentTrack = () => {
       },
     })
       .then((resp) => {
-        console.log(resp);
         if (resp.status === 204) {
           return null;
         } else {
@@ -193,7 +189,6 @@ const spotifyCheckForCurrentTrack = () => {
       })
       .then((data) => {
         localStorage.setItem(SPOTIFY_USED_KEY, true);
-        console.log("response from currently-playing", data);
         if (data) {
           let title = data.item.name;
           let album = data.item.album.name;
@@ -204,7 +199,6 @@ const spotifyCheckForCurrentTrack = () => {
           }
           let releaseDate = data.item.album.release_date;
           let releaseYear = releaseDate.split("-")[0];
-          console.log(releaseDate, releaseYear);
           setValue("title", title);
           setValue("artist", artist);
           setValue("album", album);
@@ -213,7 +207,7 @@ const spotifyCheckForCurrentTrack = () => {
       });
   } else {
     if (localStorage.getItem(SPOTIFY_USED_KEY)) {
-      console.log("Spotify used previously, trying to obtain token");
+      // Spotify used previously, trying to obtain token
       spotifyGetAccessToken();
     }
   }
