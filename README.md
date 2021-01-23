@@ -4,3 +4,4 @@ A simple Web App for finding additional information for a given song title, arti
 
 Has optional Spotify integration to obtain the currently playing track.
   
+Check it out at https://cbolik.github.io/SongSearch
