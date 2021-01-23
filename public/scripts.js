@@ -154,8 +154,14 @@ const generateRandomString = (length) => {
 
 console.log(window.location);
 
+const getRedirectURI = (loc) => {
+  let uri = loc.origin + loc.pathname;
+  return uri.replace(/\/$/, "");
+}
+
 const SPOTIFY_CLIENT_ID = "MmQ3MzQyZjg2MTdmNGVhNmFmMmM4ODRjYTcwZTJiNDA=";
-const SPOTIFY_REDIRECT_URI = window.location.origin;
+const SPOTIFY_REDIRECT_URI = getRedirectURI(window.location);
+console.log(SPOTIFY_REDIRECT_URI);
 const SPOTIFY_STATE_KEY = "spotify_auth_state";
 const SPOTIFY_USED_KEY = "spotify_used";
 
