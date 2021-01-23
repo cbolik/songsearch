@@ -1,3 +1,5 @@
+/* Song Search - (C) 2021 Christian Bolik */
+
 body {
   margin: auto 0;
   background-color: gray;
@@ -143,9 +145,7 @@ input[type="text"] {
 
 /* Special media query for iPad in portrait */
 
-@media only screen and (min-device-width: 768px) 
-and (max-device-width: 1024px) 
-and (orientation: portrait) {
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
   .columns {
     flex-direction: column;
   }
