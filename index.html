@@ -48,10 +48,11 @@
           <label for="song_title">Song Title: </label>
           <input type="text" id="title" name="song_title" tabindex="1" autofocus>
         </div>
-        <input type="button" id="lyrics" onclick="openLyrics()" value="Lyrics">
+        <input type="button" id="lyrics" onclick="openLyrics()" value="Lyrics (Google)">
         <input type="button" id="wiki_song" onclick="openWikiSong()" value="Wikipedia: Song">
-        <input type="button" id="youtube" onclick="openYouTube()" value="YouTube">
-        <input type="button" id="chords" onclick="openUltimateGuitar()" value="Chords">
+        <input type="button" id="youtube" onclick="openYouTube()" value="Videos (YouTube)">
+        <input type="button" id="chords" onclick="openUltimateGuitar()" value="Chords (Ultimate Guitar)">
+        <input type="button" id="musescore" onclick="openMuseScore()" value="Sheet Music (Musescore)">
       </div>
       <div class="col col-artist">
         <div class="input-combo">
@@ -59,7 +60,8 @@
           <input type="text" id="artist" name="artist" tabindex="2">
         </div>
         <input type="button" id="wiki_artist" onclick="openWikiArtist()" value="Wikipedia: Artist">
-        <input type="button" id="artist_home" onclick="openHomepage()" value="Homepage">
+        <input type="button" id="allmusic_artist" onclick="openAllMusicArtist()" value="AllMusic: Artist">
+        <input type="button" id="artist_home" onclick="openHomepage()" value="Homepage (Google)">
       </div>
       <div class="col col-album">
         <div class="input-combo">
@@ -68,6 +70,7 @@
           <div class="year-label" id="year"></div>
         </div>
         <input type="button" id="wiki_album" onclick="openWikiAlbum()" value="Wikipedia: Album">
+        <input type="button" id="allmusic_album" onclick="openAllMusicAlbum()" value="AllMusic: Album">
         <input type="button" id="discogs" onclick="openDiscogs()" value="Discogs">
       </div>
     </div>
