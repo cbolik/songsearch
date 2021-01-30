@@ -9,6 +9,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="get lyrics, videos, background information for any song or the currently playing track on Spotify">
+  <meta name="og:description"
+    content="get lyrics, videos etc. for any song or Spotify's current track">
+  <meta property="og:title" content="Song Search" />
+  <meta property="og:url" content="https://cbolik.github.io/songsearch" />
+  <meta property="og:image" content="https://cbolik.github.io/songsearch/icons/SongSearch-vert.jpg" />
+
   <title>Song Search</title>
   <link rel="stylesheet" href="styles.css">
   <script src="scripts.js"></script>
@@ -67,7 +74,7 @@
     <div class="spotify">
       <a href="https://open.spotify.com" title="Spotify" target="_blank"><i class="fab fa-spotify fa-2x spotify-label"></i></a>
       <input type="button" id="spotify_search" onclick="spotifySearch()" value="Search">
-      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Connect">
+      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Get Current Track">
     </div>
   </form>
 
