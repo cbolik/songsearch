@@ -92,11 +92,23 @@ const openDiscogs = () => {
   genAction("https://discogs.com/search/?q=!ALBUM!%20?ARTIST?");
 };
 
+const openAllMusicArtist = () => {
+  genAction("https://www.allmusic.com/search/all/!ARTIST!");
+};
+
+const openAllMusicAlbum = () => {
+  genAction("https://www.allmusic.com/search/all/!ALBUM!%20?ARTIST?");
+};
+
 const openUltimateGuitar = () => {
   genAction(
     "https://www.ultimate-guitar.com/search.php?search_type=title&value=!TITLE!%20?ARTIST?"
   );
 }
+
+const openMuseScore = () => {
+  genAction("https://musescore.com/sheetmusic?text=!TITLE!%20?ARTIST?");
+};
 
 const spotifySearch = () => {
   genAction("https://open.spotify.com/search/!TITLE!%20?ARTIST?");
