@@ -127,8 +127,8 @@ const resetFields = () => {
  * @return Object
  */
 const getHashParams = () => {
-  var hashParams = {};
-  var e, r = /([^&;=]+)=?([^&;]*)/g,
+  let hashParams = {};
+  let e, r = /([^&;=]+)=?([^&;]*)/g,
       q = window.location.hash.substring(1);
   while ( e = r.exec(q)) {
       hashParams[e[1]] = decodeURIComponent(e[2]);
@@ -143,8 +143,8 @@ const getHashParams = () => {
  * @return {string} The generated string
  */
 const generateRandomString = (length) => {
-  var text = '';
-  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let text = '';
+  let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   for (var i = 0; i < length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -193,7 +193,11 @@ const spotifyCheckForCurrentTrack = () => {
         localStorage.setItem(SPOTIFY_USED_KEY, true);
         if (data) {
           let title = data.item.name;
+          // cut off " - ..."
+          title = title.replace(/ -.*$/, "");
           let album = data.item.album.name;
+          // cut off " (..."
+          album = album.replace(/ [\(\[].*$/, "");
           let artist = "";
           // if multiple artists concat them together
           for (let a of data.item.artists) {
@@ -205,14 +209,14 @@ const spotifyCheckForCurrentTrack = () => {
           setValue("artist", artist);
           setValue("album", album);
           setYear(releaseYear);
-          setValue("spotify_current", "Get Current");
+          setValue("spotify_current", "Get Current Track");
         }
       });
   } else {
     if (localStorage.getItem(SPOTIFY_USED_KEY)) {
       // Spotify used previously, trying to obtain token
       localStorage.removeItem(SPOTIFY_USED_KEY); // remove to avoid infinite loop
-      setValue("spotify_current", "Connect");
+      setValue("spotify_current", "Get Current Track");
       spotifyGetAccessToken();
     }
   }
