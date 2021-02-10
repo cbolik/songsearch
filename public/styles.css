@@ -2,7 +2,7 @@
 
 body {
   margin: auto 0;
-  background-color: gray;
+  background-color: rgb(75, 75, 75);
 }
 
 .banner {
@@ -16,17 +16,21 @@ body {
   position: relative;
 }
 
-.banner input[type="button"] {
+.banner .buttons {
   position: absolute;
   right: 0px;
   bottom: 0px;
   margin: 8px;
+}
+
+.banner input[type="button"] {
   padding: 4px;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   border-radius: 2px;
   border-width: thin;
   background-color: rgb(230, 230, 230);
+  cursor: pointer;
 }
 
 .banner h1 {
@@ -93,6 +97,7 @@ label {
   border-radius: 4px;
   border-width: thin;
   background-color: rgb(230, 230, 230);
+  cursor: pointer;
 }
 
 input[type="text"] {
@@ -112,7 +117,7 @@ input[type="text"] {
   display: flex;
 }
 
-.spotify input[type="button"] {
+.spotify input[type="button"],.help-text input[type="button"] {
   margin: 4px;
   padding: 4px 8px 4px 8px;
   font-family: Arial, Helvetica, sans-serif;
@@ -120,12 +125,20 @@ input[type="text"] {
   border-radius: 4px;
   border-width: thin;
   background-color: rgb(210, 210, 210);
+  cursor: pointer;
 }
 
 .spotify-label {
   margin: 8px;
   padding: 4px;
   color: rgb(23, 187, 23);
+}
+
+.help-text {
+  display: none;
+  color: rgb(226, 226, 226);
+  margin: 2% 10% 2% 10%;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 @media only screen and (max-width: 768px) {

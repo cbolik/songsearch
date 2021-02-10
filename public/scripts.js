@@ -72,9 +72,13 @@ const openHomepage = () => {
   genAction("https://www.google.com/search?q=!ARTIST!%20homepage");
 };
 
-const openYouTube = () => {
+const openYouTubeSong = () => {
   genAction("https://www.youtube.com/results?search_query=!TITLE!%20?ARTIST?");
 }
+
+const openYouTubeArtist = () => {
+  genAction("https://www.youtube.com/results?search_query=!ARTIST!");
+};
 
 const openWikiSong = () => {
   genAction("http://www.wikipedia.org/search-redirect.php?search=!TITLE!");
@@ -110,6 +114,10 @@ const openMuseScore = () => {
   genAction("https://musescore.com/sheetmusic?text=!TITLE!%20?ARTIST?");
 };
 
+const openTwitter = () => {
+  genAction("https://twitter.com/search?q=!ARTIST!");
+};
+
 const spotifySearch = () => {
   genAction("https://open.spotify.com/search/!TITLE!%20?ARTIST?");
 }
@@ -131,6 +139,16 @@ const resetFields = () => {
   setValue("artist", "");
   setValue("album", "");
   document.getElementById("year").style.display = "none";
+};
+
+const showHelp = () => {
+  document.getElementById("help-block").style.display = "block";
+  window.location = "#help-block";
+};
+
+const hideHelp = () => {
+  document.getElementById("help-block").style.display = "none";
+  window.location = "#top";
 };
 
 /**
@@ -195,7 +213,7 @@ const spotifyCheckForCurrentTrack = () => {
       .then((resp) => {
         if (resp.status === 204) {
           localStorage.setItem(SPOTIFY_USED_KEY, true);
-          setValue("spotify_current", "Get Current");
+          setValue("spotify_current", "Get Current Track");
           return null;
         } else {
           return resp.json();
