@@ -19,6 +19,7 @@
   <title>Song Search</title>
   <link rel="stylesheet" href="styles.css">
   <script src="scripts.js"></script>
+  <script src="swipe.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
     integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
     crossorigin="anonymous" />
@@ -47,6 +48,11 @@
     </div>
   </div>
   <form>
+    <div class="spotify">
+      <a href="https://open.spotify.com" title="Spotify" target="_blank"><i
+          class="fab fa-spotify fa-2x spotify-label"></i></a>
+      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Get Current Track">
+    </div>
     <div class="columns">
       <div class="col col-title"> 
         <div class="input-combo">
@@ -54,21 +60,28 @@
           <input type="text" id="title" name="song_title" tabindex="1" autofocus>
         </div>
         <input type="button" id="lyrics" onclick="openLyrics()" value="Lyrics (Google)">
-        <input type="button" id="wiki_song" onclick="openWikiSong()" value="Wikipedia: Song">
-        <input type="button" id="youtube" onclick="openYouTubeSong()" value="YouTube: Song">
-        <input type="button" id="chords" onclick="openUltimateGuitar()" value="Chords (Ultimate Guitar)">
-        <input type="button" id="musescore" onclick="openMuseScore()" value="Sheet Music (Musescore)">
+        <input type="button" id="wiki_song" onclick="openWikiSong()" value="Wikipedia">
+        <input type="button" id="youtube" onclick="openYouTubeSong()" value="YouTube">
+        <div class="addtl-actions">
+          <input type="button" id="spotify_search" onclick="spotifySearch()" value="Search on Spotify">
+          <input type="button" id="chords" onclick="openUltimateGuitar()" value="Chords (Ultimate Guitar)">
+          <input type="button" id="musescore" onclick="openMuseScore()" value="Sheet Music (Musescore)">
+          <input type="button" id="wiki_de_song" onclick="openWikiSong('de')" value="de.Wikipedia">
+        </div>
       </div>
       <div class="col col-artist">
         <div class="input-combo">
           <label for="artist">Artist: </label>
           <input type="text" id="artist" name="artist" tabindex="2">
         </div>
-        <input type="button" id="wiki_artist" onclick="openWikiArtist()" value="Wikipedia: Artist">
-        <input type="button" id="allmusic_artist" onclick="openAllMusicArtist()" value="AllMusic: Artist">
+        <input type="button" id="wiki_artist" onclick="openWikiArtist()" value="Wikipedia">
+        <input type="button" id="allmusic_artist" onclick="openAllMusicArtist()" value="AllMusic">
         <input type="button" id="artist_home" onclick="openHomepage()" value="Homepage (Google)">
-        <input type="button" id="youtube" onclick="openYouTubeArtist()" value="YouTube: Artist">
-        <input type="button" id="twitter" onclick="openTwitter()" value="Twitter">
+        <div class="addtl-actions">
+          <input type="button" id="youtube" onclick="openYouTubeArtist()" value="YouTube">
+          <input type="button" id="twitter" onclick="openTwitter()" value="Twitter">
+          <input type="button" id="wiki_de_artist" onclick="openWikiArtist('de')" value="de.Wikipedia">
+        </div>
       </div>
       <div class="col col-album">
         <div class="input-combo">
@@ -76,15 +89,13 @@
           <input type="text" id="album" name="album" tabindex="3">
           <div class="year-label" id="year"></div>
         </div>
-        <input type="button" id="wiki_album" onclick="openWikiAlbum()" value="Wikipedia: Album">
-        <input type="button" id="allmusic_album" onclick="openAllMusicAlbum()" value="AllMusic: Album">
+        <input type="button" id="wiki_album" onclick="openWikiAlbum()" value="Wikipedia">
+        <input type="button" id="allmusic_album" onclick="openAllMusicAlbum()" value="AllMusic">
         <input type="button" id="discogs" onclick="openDiscogs()" value="Discogs">
+        <div class="addtl-actions">
+          <input type="button" id="wiki_de_album" onclick="openWikiAlbum('de')" value="de.Wikipedia">
+        </div>
       </div>
-    </div>
-    <div class="spotify">
-      <a href="https://open.spotify.com" title="Spotify" target="_blank"><i class="fab fa-spotify fa-2x spotify-label"></i></a>
-      <input type="button" id="spotify_search" onclick="spotifySearch()" value="Search">
-      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Get Current Track">
     </div>
   </form>
 
@@ -93,6 +104,11 @@
     document.getElementById("title").addEventListener("keyup", (event) => enterPressed(event));
     document.getElementById("artist").addEventListener("keyup", (event) => enterPressed(event));
     document.getElementById("album").addEventListener("keyup", (event) => albumKeyPressed(event));
+
+    // pull down to refresh
+    document.addEventListener('touchstart', function (e) { swipeStart(e); }, false);
+    document.addEventListener('touchmove', function (e) { swipeMove(e); }, false);
+    document.addEventListener('touchend', function (e) { swipeEnd(e); }, false);
 
     spotifyCheckForCurrentTrack();
   </script>
