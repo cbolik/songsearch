@@ -274,24 +274,9 @@ const spotifyCheckForCurrentTrack = () => {
       .then((data) => {
         localStorage.setItem(SPOTIFY_USED_KEY, true);
         if (data) {
-          let title = data.item.name;
-          // cut off " - ..."
-          title = title.replace(/ -.*$/, "");
-          let album = data.item.album.name;
-          // cut off " (..."
-          album = album.replace(/ [\(\[].*$/, "");
-          let artist = "";
-          // if multiple artists concat them together
-          for (let a of data.item.artists) {
-            artist += a.name + " ";
-          }
-          let releaseDate = data.item.album.release_date;
-          let releaseYear = releaseDate.split("-")[0];
-          setValue("title", title);
-          setValue("artist", artist);
-          setValue("album", album);
-          setYear(releaseYear);
-          setValue("spotify_current", "Get Current Track");
+          populateFromSpotify(data.item);
+        } else {
+          spotifyCheckLastPlayedTrack(access_token);
         }
       });
   } else {
@@ -306,7 +291,7 @@ const spotifyCheckForCurrentTrack = () => {
 
 const spotifyGetAccessToken = () => {
   // authorize user and get access token
-  let scope = "user-read-currently-playing";
+  let scope = "user-read-currently-playing user-read-recently-played";
   let url = "https://accounts.spotify.com/authorize";
   let state = generateRandomString(16);
   localStorage.setItem(SPOTIFY_STATE_KEY, state);
@@ -318,4 +303,71 @@ const spotifyGetAccessToken = () => {
   url += "&state=" + encodeURIComponent(state);
   window.location = url;
 }
+
+const spotifyCheckLastPlayedTrack = (access_token) => {
+  // try to get recently played tracks
+  url = "https://api.spotify.com/v1/me/player/recently-played?limit=1";
+  fetch(url, {
+    headers: {
+      Authorization: "Bearer " + access_token,
+      Accept: "application/json",
+    },
+  })
+    .then((resp) => {
+      console.log(resp.status);
+      if (resp.status === 204) {
+        return null;
+      } else {
+        return resp.json();
+      }
+    })
+    .then((data) => {
+      if (data) {
+        populateFromSpotify(data.items[0].track);
+        /*
+        let title = data.items[0].track.name;
+        // cut off " - ..."
+        title = title.replace(/ -.*$/, "");
+        let album = data.items[0].track.album.name;
+        // cut off " (..."
+        album = album.replace(/ [\(\[].*$/, "");
+        let artist = "";
+        // if multiple artists concat them together
+        for (let a of data.items[0].track.artists) {
+          artist += a.name + " ";
+        }
+        let releaseDate = data.items[0].track.album.release_date;
+        let releaseYear = releaseDate.split("-")[0];
+        setValue("title", title);
+        setValue("artist", artist);
+        setValue("album", album);
+        setYear(releaseYear);
+        setValue("spotify_current", "Get Current Track");
+        */
+      }
+    });
+};
+
+const populateFromSpotify = (attr_prefix) => {
+  let title = attr_prefix.name;
+  // cut off " - ..."
+  title = title.replace(/ -.*$/, "");
+  let album = attr_prefix.album.name;
+  // cut off " (..."
+  album = album.replace(/ [\(\[].*$/, "");
+  let artist = "";
+  // if multiple artists concat them together
+  for (let a of attr_prefix.artists) {
+    artist += a.name + " ";
+  }
+  let releaseDate = attr_prefix.album.release_date;
+  let releaseYear = releaseDate.split("-")[0];
+  setValue("title", title);
+  setValue("artist", artist);
+  setValue("album", album);
+  setYear(releaseYear);
+  setValue("spotify_current", "Get Current Track");
+
+}
+
 

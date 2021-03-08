@@ -1,8 +1,11 @@
 {
   "author": "cbolik",
-  "name": "SongSearch",
+  "name": "songsearch",
   "description": "Search for additional information on the currently playing track, or any other song.",
   "version": "0.0.1",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "express": "~4.16.0"
   },
