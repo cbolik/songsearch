@@ -1,0 +1,135 @@
+<!--
+  Song Search - A Web App for finding additional information for a given song title, artist, or album.
+  Has optional Spotify integration to obtain the currently playing track.
+
+  (C) 2021 Christian Bolik
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="get lyrics, videos, background information for any song or the currently playing track on Spotify">
+  <meta name="og:description"
+    content="get lyrics, videos etc. for any song or Spotify's current track">
+  <meta property="og:title" content="Song Search" />
+  <meta property="og:url" content="https://cbolik.github.io/songsearch" />
+  <meta property="og:image" content="https://cbolik.github.io/songsearch/icons/SongSearch-vert.jpg" />
+
+  <title>Song Search</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="scripts.js"></script>
+  <script src="swipe.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+    integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
+    crossorigin="anonymous" />
+  <!-- third-generation iPad with high-resolution Retina display: -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144"
+    href="icons/music-note-icon-144-155161.png">
+  <!-- iPhone with high-resolution Retina display: -->
+  <link rel="apple-touch-icon-precomposed" sizes="114x114"
+    href="icons/music-note-icon-114-155161.png">
+  <!-- first- and second-generation iPad: -->
+  <link rel="apple-touch-icon-precomposed" sizes="72x72"
+    href="icons/music-note-icon-72-155161.png">
+  <!-- non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
+  <link rel="apple-touch-icon-precomposed" href="icons/music-note-icon-57-155161.png">
+  <!-- basic favicon -->
+  <link rel="shortcut icon" href="icons/music-note-icon-32-155161.png">
+</head>
+<body>
+  <div class="banner" id="top">
+    <h1>Song Search</h1>
+    <div class="buttons">
+      <!--
+      <input type="button" id="reset" onclick="resetFields()" value="Clear" tabindex="-1">
+      -->
+      <input type="button" id="help" onclick="showHelp()" value="Help" tabindex="-1">
+    </div>
+  </div>
+  <form>
+    <div class="spotify">
+      <a href="https://open.spotify.com" title="Spotify" target="_blank"><i
+          class="fab fa-spotify fa-2x spotify-label"></i></a>
+      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Get Current Track">
+    </div>
+    <div class="columns">
+      <div class="col col-title"> 
+        <div class="input-combo">
+          <label for="song_title">Song Title: </label>
+          <input type="text" id="title" name="song_title" tabindex="1" autofocus>
+        </div>
+        <input type="button" id="lyrics" onclick="openLyrics()" value="Lyrics (Google)">
+        <input type="button" id="wiki_song" onclick="openWikiSong()" value="Wikipedia">
+        <input type="button" id="youtube" onclick="openYouTubeSong()" value="YouTube">
+        <div class="addtl-actions">
+          <input type="button" id="spotify_search" onclick="spotifySearch()" value="Search on Spotify">
+          <input type="button" id="chords" onclick="openUltimateGuitar()" value="Chords (Ultimate Guitar)">
+          <input type="button" id="musescore" onclick="openMuseScore()" value="Sheet Music (Musescore)">
+          <input type="button" id="wiki_de_song" onclick="openWikiSong('de')" value="de.Wikipedia">
+        </div>
+      </div>
+      <div class="col col-artist">
+        <div class="input-combo">
+          <label for="artist">Artist: </label>
+          <input type="text" id="artist" name="artist" tabindex="2">
+        </div>
+        <input type="button" id="wiki_artist" onclick="openWikiArtist()" value="Wikipedia">
+        <input type="button" id="allmusic_artist" onclick="openAllMusicArtist()" value="AllMusic">
+        <input type="button" id="artist_home" onclick="openHomepage()" value="Homepage (Google)">
+        <div class="addtl-actions">
+          <input type="button" id="youtube" onclick="openYouTubeArtist()" value="YouTube">
+          <input type="button" id="twitter" onclick="openTwitter()" value="Twitter">
+          <input type="button" id="wiki_de_artist" onclick="openWikiArtist('de')" value="de.Wikipedia">
+        </div>
+      </div>
+      <div class="col col-album">
+        <div class="input-combo">
+          <label for="album">Album: </label>
+          <input type="text" id="album" name="album" tabindex="3">
+          <div class="year-label" id="year"></div>
+        </div>
+        <input type="button" id="wiki_album" onclick="openWikiAlbum()" value="Wikipedia">
+        <input type="button" id="allmusic_album" onclick="openAllMusicAlbum()" value="AllMusic">
+        <input type="button" id="discogs" onclick="openDiscogs()" value="Discogs">
+        <div class="addtl-actions">
+          <input type="button" id="wiki_de_album" onclick="openWikiAlbum('de')" value="de.Wikipedia">
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <script>
+    // trigger Lyrics button when Enter is pressed
+    document.getElementById("title").addEventListener("keyup", (event) => enterPressed(event));
+    document.getElementById("artist").addEventListener("keyup", (event) => enterPressed(event));
+    document.getElementById("album").addEventListener("keyup", (event) => albumKeyPressed(event));
+
+    // pull down to refresh
+    document.addEventListener('touchstart', function (e) { swipeStart(e); }, false);
+    document.addEventListener('touchmove', function (e) { swipeMove(e); }, false);
+    document.addEventListener('touchend', function (e) { swipeEnd(e); }, false);
+
+    spotifyCheckForCurrentTrack();
+  </script>
+  <p>
+    <div id="help-block" class="help-text">
+      Hey. Just a few quick notes to help you get the most out of <i>Song Search</i>:
+      <ol>
+        <li>If you're using Spotify, <i>Song Search</i> can get the details of your currently playing track when you click on
+          "Get Current Track". The first time you do this you will need to log into Spotify.
+          This is required so <i>Song Search</i> can retrieve the details of the track you're currently playing.
+        <li>Once you've done this, you just need to reload this page in your browser for <i>Song Search</i>
+          to retrieve the currently playing song.</li> Now you can tap or click any of the buttons to 
+          get more details on the song currently playing.
+        <li><i>Song Search</i> also works independently of Spotify: you can just manually enter any Song Title,
+        Artist, or Album, and the buttons will find information for those that you entered.</li>
+        <li>If on a mobile device, you can also put a bookmark for this page on your homescreen for accessing 
+          <i>Song Search</i> more easily.
+        </li>
+      </ol>
+      <input type="button" id="help-ok" onclick="hideHelp()" value="Okay!" tabindex="-1">
+    </div>
+  </p>
+</body>
+</html>
