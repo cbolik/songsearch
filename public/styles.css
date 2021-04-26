@@ -1,8 +1,19 @@
-/* Song Search - (C) 2021 Christian Bolik */
+/* Song Search - Copyright (C) 2021 Christian Bolik */
 
 body {
   margin: auto 0;
   background-color: rgb(75, 75, 75);
+}
+
+.copyright {
+  margin: 8px;
+  color: white;
+  font-size: 0.8em;
+  font-style: italic;
+}
+
+.copyright a {
+  color: white;
 }
 
 .banner {

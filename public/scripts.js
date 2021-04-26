@@ -1,7 +1,7 @@
 /**
  * Song Search JS portions
  * 
- * (C) 2021 Christian Bolik
+ * Copyright (C) 2021 Christian Bolik
  */
 
 
