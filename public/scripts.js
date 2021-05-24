@@ -120,6 +120,10 @@ const openYouTubeArtist = () => {
   genAction("https://www.youtube.com/results?search_query=!ARTIST!");
 };
 
+const openYouTubeAlbum = () => {
+  genAction("https://www.youtube.com/results?search_query=!ALBUM!");
+};
+
 const openWikiSong = (lang) => {
   if (lang) {
     genAction(`http://www.wikipedia.org/search-redirect.php?language=${lang}&search=!TITLE!`);
