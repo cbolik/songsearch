@@ -269,7 +269,6 @@ const spotifyCheckForCurrentTrack = () => {
       .then((resp) => {
         if (resp.status === 204) {
           localStorage.setItem(SPOTIFY_USED_KEY, true);
-          setValue("spotify_current", "Get Current Track");
           return null;
         } else {
           return resp.json();
@@ -287,7 +286,6 @@ const spotifyCheckForCurrentTrack = () => {
     if (localStorage.getItem(SPOTIFY_USED_KEY)) {
       // Spotify used previously, trying to obtain token
       localStorage.removeItem(SPOTIFY_USED_KEY); // remove to avoid infinite loop
-      setValue("spotify_current", "Get Current Track");
       spotifyGetAccessToken();
     }
   }
@@ -328,26 +326,6 @@ const spotifyCheckLastPlayedTrack = (access_token) => {
     .then((data) => {
       if (data) {
         populateFromSpotify(data.items[0].track);
-        /*
-        let title = data.items[0].track.name;
-        // cut off " - ..."
-        title = title.replace(/ -.*$/, "");
-        let album = data.items[0].track.album.name;
-        // cut off " (..."
-        album = album.replace(/ [\(\[].*$/, "");
-        let artist = "";
-        // if multiple artists concat them together
-        for (let a of data.items[0].track.artists) {
-          artist += a.name + " ";
-        }
-        let releaseDate = data.items[0].track.album.release_date;
-        let releaseYear = releaseDate.split("-")[0];
-        setValue("title", title);
-        setValue("artist", artist);
-        setValue("album", album);
-        setYear(releaseYear);
-        setValue("spotify_current", "Get Current Track");
-        */
       }
     });
 };
@@ -370,8 +348,53 @@ const populateFromSpotify = (attr_prefix) => {
   setValue("artist", artist);
   setValue("album", album);
   setYear(releaseYear);
-  setValue("spotify_current", "Get Current Track");
 
 }
 
+const kexpGetCurrentTrack = () => {
+  url = "https://api.kexp.org/v2/plays/?limit=2";
+  fetch(url, {
+    headers: {
+      Accept: "application/json",
+    },
+  })
+  .then((resp) => {
+    console.log(resp.status);
+    if (resp.status === 204) {
+      return null;
+    } else {
+      return resp.json();
+    }
+  })
+  .then((data) => {
+    if (data) {
+      // check if in "airbreak", if yes skip to previous song
+      if (data.results[0].song) {
+        populateFromKEXP(data.results[0]);
+      } else {
+        populateFromKEXP(data.results[1]);
+      }
+    }
+  });
+}
 
+const populateFromKEXP = (attr_prefix) => {
+  let title = attr_prefix.song;
+  // cut off " - ..."
+  title = title.replace(/ -.*$/, "");
+  let album = attr_prefix.album;
+  // cut off " (..."
+  album = album.replace(/ [\(\[].*$/, "");
+  let artist = attr_prefix.artist;
+  // if multiple artists concat them together
+  // for (let a of attr_prefix.artists) {
+  //   artist += a.name + " ";
+  // }
+  let releaseDate = attr_prefix.release_date;
+  let releaseYear = releaseDate.split("-")[0];
+  setValue("title", title);
+  setValue("artist", artist);
+  setValue("album", album);
+  setYear(releaseYear);
+
+}
