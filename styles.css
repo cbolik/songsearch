@@ -130,6 +130,7 @@ label {
 
 .col input[type="button"] {
   display: block;
+  color: black;
   margin: 8px 8px 16px 8px;
   padding: 4px;
   width: 80%;
