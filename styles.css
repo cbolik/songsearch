@@ -72,6 +72,12 @@ body {
   text-transform: uppercase;
 }
 
+#get_from {
+  color: white;
+  padding-left: 12px;
+  font-size: 14px;
+}
+
 .columns {
   display: flex;
   justify-content: center;
@@ -88,7 +94,7 @@ body {
 .svc_icon {
   width: 16px;
   height: 16px;
-  padding-left: 14px;
+  padding-left: 12px;
   padding-right: 4px;
 }
 

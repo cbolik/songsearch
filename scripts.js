@@ -190,6 +190,14 @@ const spotifySearch = () => {
   genAction("https://open.spotify.com/search/!TITLE!%20?ARTIST?");
 }
 
+const spotifySearchArtist = () => {
+  genAction("https://open.spotify.com/search/!ARTIST!");
+}
+
+const spotifySearchAlbum = () => {
+  genAction("https://open.spotify.com/search/!ALBUM!%20?ARTIST?");
+}
+
 const enterPressed = (event) => {
   event.preventDefault();
   if (event.keyCode === 13) {
@@ -403,10 +411,13 @@ const populateFromKEXP = (attr_prefix) => {
   //   artist += a.name + " ";
   // }
   let releaseDate = attr_prefix.release_date;
-  let releaseYear = releaseDate.split("-")[0];
+
   setValue("title", title);
   setValue("artist", artist);
   setValue("album", album);
-  setYear(releaseYear);
+  if (releaseDate) {
+    let releaseYear = releaseDate.split("-")[0];
+    setYear(releaseYear);
+  }
 
 }

@@ -49,14 +49,15 @@
   </div>
   <form>
     <div class="spotify">
+      <!-- <span id="get_from">Get from:</span> -->
       <a href="https://open.spotify.com" title="Spotify" target="_blank">
         <img src="icons/spotify.ico" class="svc_icon"/>
       </a>
-      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Spotify Current Track">
+      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Spotify Current">
       <a href="https://kexp.org" title="KEXP" target="_blank">
         <img src="icons/kexp.ico" class="svc_icon"/>
       </a>
-      <input type="button" id="kexp_current" onclick="kexpGetCurrentTrack()" value="KEXP Current Track">
+      <input type="button" id="kexp_current" onclick="kexpGetCurrentTrack()" value="KEXP Current">
     </div>
     <div class="columns">
       <div class="col col-title"> 
@@ -68,7 +69,7 @@
         <input type="button" id="wiki_song" onclick="openWikiSong()" value="Wikipedia">
         <input type="button" id="youtube_song" onclick="openYouTubeSong()" value="YouTube">
         <div class="addtl-actions">
-          <input type="button" id="spotify_search" onclick="spotifySearch()" value="Search on Spotify">
+          <input type="button" id="spotify_search" onclick="spotifySearch()" value="Spotify">
           <input type="button" id="chords" onclick="openUltimateGuitar()" value="Chords (Ultimate Guitar)">
           <input type="button" id="musescore" onclick="openMuseScore()" value="Sheet Music (Musescore)">
           <input type="button" id="wiki_de_song" onclick="openWikiSong('de')" value="de.Wikipedia">
@@ -84,6 +85,7 @@
         <input type="button" id="artist_home" onclick="openHomepage()" value="Homepage (Google)">
         <div class="addtl-actions">
           <input type="button" id="youtube_artist" onclick="openYouTubeArtist()" value="YouTube">
+          <input type="button" id="spotify_artist" onclick="spotifySearchArtist()" value="Spotify">
           <input type="button" id="bandcamp_artist" onclick="openBandcampArtist('de')" value="Bandcamp">
           <input type="button" id="twitter" onclick="openTwitter()" value="Twitter">
           <input type="button" id="wiki_de_artist" onclick="openWikiArtist('de')" value="de.Wikipedia">
@@ -98,8 +100,9 @@
         <input type="button" id="wiki_album" onclick="openWikiAlbum()" value="Wikipedia">
         <input type="button" id="allmusic_album" onclick="openAllMusicAlbum()" value="AllMusic">
         <input type="button" id="metacritic" onclick="openMetaCritic()" value="MetaCritic">
-        <input type="button" id="youtube_album" onclick="openYouTubeAlbum()" value="YouTube">
         <div class="addtl-actions">
+          <input type="button" id="youtube_album" onclick="openYouTubeAlbum()" value="YouTube">
+          <input type="button" id="spotify_album" onclick="spotifySearchAlbum()" value="Spotify">
           <input type="button" id="discogs" onclick="openDiscogs()" value="Discogs">
           <input type="button" id="musicbrainz" onclick="openMusicBrainz()" value="MusicBrainz">
           <input type="button" id="wiki_de_album" onclick="openWikiAlbum('de')" value="de.Wikipedia">
