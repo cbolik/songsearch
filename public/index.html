@@ -49,15 +49,23 @@
   </div>
   <form>
     <div class="spotify">
-      <!-- <span id="get_from">Get from:</span> -->
+      <span id="get_from">Get from:</span>
       <a href="https://open.spotify.com" title="Spotify" target="_blank">
         <img src="icons/spotify.ico" class="svc_icon"/>
       </a>
-      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Spotify Current">
+      <input type="button" id="spotify_current" onclick="spotifyGetAccessToken()" value="Spotify">
       <a href="https://kexp.org" title="KEXP" target="_blank">
         <img src="icons/kexp.ico" class="svc_icon"/>
       </a>
-      <input type="button" id="kexp_current" onclick="kexpGetCurrentTrack()" value="KEXP Current">
+      <input type="button" id="kexp_current" onclick="kexpGetCurrentTrack()" value="KEXP">
+      <a href="https://www.fluxfm.de" title="FluxFM" target="_blank">
+        <img src="icons/FluxFM.webp" class="svc_icon"/>
+      </a>
+      <input type="button" id="fluxfm_current" onclick="fluxfmGetCurrentTrack('7efc3ff2-4804-431f-aaa9-7d1f8a7727c7')" value="FluxFM">
+      <a href="https://www.fluxfm.de/channels/a777b93d-e60c-47f9-be28-1233e6c9802d" title="FluxKompensator" target="_blank">
+        <img src="icons/FluxKomp.webp" class="svc_icon"/>
+      </a>
+      <input type="button" id="fluxkomp_current" onclick="fluxfmGetCurrentTrack('a777b93d-e60c-47f9-be28-1233e6c9802d')" value="FluxKompensator">
     </div>
     <div class="columns">
       <div class="col col-title"> 

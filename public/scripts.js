@@ -429,3 +429,57 @@ const populateFromKEXP = (attr_prefix) => {
   }
 
 }
+
+const fluxfmGetCurrentTrack = (channelId) => {
+  url = `https://fluxmusic.api.radiosphere.io/channels/${channelId}/current-track`;
+  fetch(url, {
+    headers: {
+      Accept: "application/json",
+    },
+  })
+  .then((resp) => {
+    console.log(resp.status);
+    if (resp.status === 204) {
+      return null;
+    } else {
+      return resp.json();
+    }
+  })
+  .then((data) => {
+    if (data) {
+      populateFromFluxFM(data.trackInfo);
+    }
+  });
+}
+
+const populateFromFluxFM = (attr_prefix) => {
+  let title = attr_prefix.title;
+  if (title) {
+    // cut off " - ..."
+    title = title.replace(/ -.*$/, "");
+  }    
+  setValue("title", title);
+
+  let artist = attr_prefix.artistCredits;
+  setValue("artist", artist);
+
+  if (attr_prefix.release) {
+    let album = attr_prefix.release.title;
+    if (album) {
+      // cut off " (..."
+      album = album.replace(/ [\(\[].*$/, "");
+    }
+    setValue("album", album);
+  
+    let releaseYear = attr_prefix.release.year;
+    if (releaseYear) {
+      setYear(releaseYear);
+    } else {
+      setYear("");
+    }
+  } else {
+    setValue("album", "");
+    setYear("");
+  }
+
+}
