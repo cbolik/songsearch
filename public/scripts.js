@@ -15,14 +15,18 @@ const setValue = (id, value) => {
 
 const setYear = (year) => {
   let el = document.getElementById("year");
-  el.innerHTML = "(" + year + ")";
+  if (year) {
+    el.innerHTML = "(" + year + ")";
+  } else {
+    el.innerHTML = "";
+  }
   el.style.display = "inline";
 };
 
 const handleEmptyField = (field) => {
   console.error(field + " cannot be empty for this action");
   let capf = field.charAt(0).toUpperCase() + field.slice(1);
-  alert(`Hello. This action requires ${capf} to be filled in.`);
+  alert(`This action requires ${capf} to be filled in.`);
 };
 
 const replaceFieldInURL = (urlTemplate, field) => {
@@ -400,24 +404,28 @@ const kexpGetCurrentTrack = () => {
 
 const populateFromKEXP = (attr_prefix) => {
   let title = attr_prefix.song;
-  // cut off " - ..."
-  title = title.replace(/ -.*$/, "");
-  let album = attr_prefix.album;
-  // cut off " (..."
-  album = album.replace(/ [\(\[].*$/, "");
-  let artist = attr_prefix.artist;
-  // if multiple artists concat them together
-  // for (let a of attr_prefix.artists) {
-  //   artist += a.name + " ";
-  // }
-  let releaseDate = attr_prefix.release_date;
-
+  if (title) {
+    // cut off " - ..."
+    title = title.replace(/ -.*$/, "");
+  }    
   setValue("title", title);
+
+  let artist = attr_prefix.artist;
   setValue("artist", artist);
+
+  let album = attr_prefix.album;
+  if (album) {
+    // cut off " (..."
+    album = album.replace(/ [\(\[].*$/, "");
+  }
   setValue("album", album);
+
+  let releaseDate = attr_prefix.release_date;
   if (releaseDate) {
     let releaseYear = releaseDate.split("-")[0];
     setYear(releaseYear);
+  } else {
+    setYear("");
   }
 
 }
