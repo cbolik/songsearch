@@ -73,9 +73,12 @@
     </div>
     <div class="columns">
       <div class="col col-title"> 
-        <div class="input-combo">
+        <div class="input-combo" id="title_wrapper">
           <label for="song_title">Song Title: </label>
-          <input type="text" id="title" name="song_title" tabindex="1" autofocus>
+          <input type="text" id="title" name="song_title" tabindex="1" list="title_list">
+          <span></span>
+          <datalist id="title_list">
+          </datalist>  
         </div>
         <input type="button" id="lyrics" onclick="openLyrics()" value="Lyrics (Google)">
         <input type="button" id="wiki_song" onclick="openWikiSong()" value="Wikipedia">
@@ -88,9 +91,12 @@
         </div>
       </div>
       <div class="col col-artist">
-        <div class="input-combo">
+        <div class="input-combo" id="artist_wrapper">
           <label for="artist">Artist: </label>
-          <input type="text" id="artist" name="artist" tabindex="2">
+          <input type="text" id="artist" name="artist" tabindex="2" list="artist_list">
+          <span></span>
+          <datalist id="artist_list">
+          </datalist>  
         </div>
         <input type="button" id="wiki_artist" onclick="openWikiArtist()" value="Wikipedia">
         <input type="button" id="allmusic_artist" onclick="openAllMusicArtist()" value="AllMusic">
@@ -104,9 +110,12 @@
         </div>
       </div>
       <div class="col col-album">
-        <div class="input-combo">
+        <div class="input-combo" id="album_wrapper">
           <label for="album">Album: </label>
-          <input type="text" id="album" name="album" tabindex="3">
+          <input type="text" id="album" name="album" tabindex="3" list="album_list">
+          <span></span>
+          <datalist id="album_list">
+          </datalist>  
           <div class="year-label" id="year"></div>
         </div>
         <input type="button" id="wiki_album" onclick="openWikiAlbum()" value="Wikipedia">
@@ -123,7 +132,7 @@
     </div>
   </form>
   <div class="copyright">
-    Copyright &copy; 2021 Christian Bolik. 
+    Copyright &copy; 2022 Christian Bolik. 
     <a href="https://github.com/cbolik/songsearch" target="_blank">Fork me on GitHub!</a>
   </div>
 

@@ -13,6 +13,22 @@ const setValue = (id, value) => {
   return document.getElementById(id).value = value;
 };
 
+const setOptions = (id, divId, ...options) => {
+  const listEl = document.getElementById(id);
+  const uniqueOptions = [...new Set(options)];
+  uniqueOptions.forEach(opt => {
+    const optionEl = document.createElement("option");
+    optionEl.value = opt;
+    listEl.appendChild(optionEl);
+  })
+  const divEl = document.getElementById(divId);
+  if (uniqueOptions.length > 1) {
+    divEl.classList.add("drop_down_icon")
+  } else {
+    divEl.classList.remove("drop_down_icon")
+  }
+}
+
 const setYear = (year) => {
   let el = document.getElementById("year");
   if (year) {
@@ -355,22 +371,28 @@ const spotifyCheckLastPlayedTrack = (access_token) => {
 };
 
 const populateFromSpotify = (attr_prefix) => {
-  let title = attr_prefix.name;
-  // cut off " - ..."
-  title = title.replace(/ -.*$/, "");
-  let album = attr_prefix.album.name;
+  const orig_title = attr_prefix.name;
+  // cut off " -..." and " (..."
+  const title = orig_title.replace(/ [-\(].*$/, "");
+  const orig_album = attr_prefix.album.name;
   // cut off " (..."
-  album = album.replace(/ [\(\[].*$/, "");
+  const album = orig_album.replace(/ [\(\[].*$/, "");
   let artist = "";
+  const artist_list = []
   // if multiple artists concat them together
   for (let a of attr_prefix.artists) {
     artist += a.name + " ";
+    artist_list.push(a.name);
   }
-  let releaseDate = attr_prefix.album.release_date;
-  let releaseYear = releaseDate.split("-")[0];
+  artist = artist.trimEnd();
+  const releaseDate = attr_prefix.album.release_date;
+  const releaseYear = releaseDate.split("-")[0];
   setValue("title", title);
+  setOptions("title_list", "title_wrapper", title, orig_title)
   setValue("artist", artist);
+  setOptions("artist_list", "artist_wrapper", ...artist_list)
   setValue("album", album);
+  setOptions("album_list", "album_wrapper", album, orig_album)
   setYear(releaseYear);
 
 }
@@ -403,22 +425,26 @@ const kexpGetCurrentTrack = () => {
 }
 
 const populateFromKEXP = (attr_prefix) => {
-  let title = attr_prefix.song;
-  if (title) {
-    // cut off " - ..."
-    title = title.replace(/ -.*$/, "");
+  let orig_title = attr_prefix.song;
+  let title = ""
+  if (orig_title) {
+    // cut off " - ..." and " (..."
+    title = orig_title.replace(/ [-\(].*$/, "");
   }    
   setValue("title", title);
+  setOptions("title_list", "title_wrapper", title, orig_title)
 
   let artist = attr_prefix.artist;
   setValue("artist", artist);
 
-  let album = attr_prefix.album;
-  if (album) {
+  let orig_album = attr_prefix.album;
+  let album = ""
+  if (orig_album) {
     // cut off " (..."
-    album = album.replace(/ [\(\[].*$/, "");
+    album = orig_album.replace(/ [\(\[].*$/, "");
   }
   setValue("album", album);
+  setOptions("album_list", "album_wrapper", album, orig_album)
 
   let releaseDate = attr_prefix.release_date;
   if (releaseDate) {
@@ -453,23 +479,27 @@ const fluxfmGetCurrentTrack = (channelId) => {
 }
 
 const populateFromFluxFM = (attr_prefix) => {
-  let title = attr_prefix.title;
-  if (title) {
-    // cut off " - ..."
-    title = title.replace(/ -.*$/, "");
+  let orig_title = attr_prefix.title;
+  let title = ""
+  if (orig_title) {
+    // cut off " - ..." and " (..."
+    title = orig_title.replace(/ [-\(].*$/, "");
   }    
   setValue("title", title);
-
+  setOptions("title_list", "title_wrapper", title, orig_title)
+  
   let artist = attr_prefix.artistCredits;
   setValue("artist", artist);
 
   if (attr_prefix.release) {
-    let album = attr_prefix.release.title;
-    if (album) {
+    let orig_album = attr_prefix.release.title;
+    let album = ""
+    if (orig_album) {
       // cut off " (..."
-      album = album.replace(/ [\(\[].*$/, "");
+      album = orig_album.replace(/ [\(\[].*$/, "");
     }
     setValue("album", album);
+    setOptions("album_list", "album_wrapper", album, orig_album)
   
     let releaseYear = attr_prefix.release.year;
     if (releaseYear) {
