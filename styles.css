@@ -195,6 +195,28 @@ input[type="text"] {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+#title_wrapper span {
+  position: relative;
+}
+
+#artist_wrapper span {
+  position: relative;
+}
+
+#album_wrapper span {
+  position: relative;
+}
+
+.drop_down_icon span::before {
+  content: "\2026";
+  color: grey;
+  position: absolute;
+  top: 50%;
+  left: 0px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
 @media only screen and (max-width: 768px) {
   .columns {
     flex-direction: column;
