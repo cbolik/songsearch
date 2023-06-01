@@ -436,6 +436,7 @@ const populateFromKEXP = (attr_prefix) => {
 
   let artist = attr_prefix.artist;
   setValue("artist", artist);
+  setOptions("artist_list", "artist_wrapper", artist)
 
   let orig_album = attr_prefix.album;
   let album = ""
@@ -490,6 +491,11 @@ const populateFromFluxFM = (attr_prefix) => {
   
   let artist = attr_prefix.artistCredits;
   setValue("artist", artist);
+  const artist_list = []
+  for (let a of attr_prefix.artists) {
+    artist_list.push(a.name);
+  }
+  setOptions("artist_list", "artist_wrapper", ...artist_list)
 
   if (attr_prefix.release) {
     let orig_album = attr_prefix.release.title;
