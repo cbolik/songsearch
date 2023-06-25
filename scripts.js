@@ -128,6 +128,14 @@ const openLyrics = () => {
   genAction("https://www.google.com/search?q=!TITLE!%20?ARTIST?%20lyrics");
 }
 
+const openGoogleAlbum = () => {
+  genAction("https://www.google.com/search?q=!ALBUM!%20?ARTIST?");
+}
+
+const openGoogleArtist = () => {
+  genAction("https://www.google.com/search?q=!ARTIST!");
+}
+
 const openHomepage = () => {
   genAction("https://www.google.com/search?q=!ARTIST!%20homepage");
 };
