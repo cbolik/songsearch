@@ -136,6 +136,10 @@ const openGoogleArtist = () => {
   genAction("https://www.google.com/search?q=!ARTIST!");
 }
 
+const openGoogleSong = () => {
+  genAction("https://www.google.com/search?q=!TITLE!%20?ARTIST?");
+}
+
 const openHomepage = () => {
   genAction("https://www.google.com/search?q=!ARTIST!%20homepage");
 };
@@ -403,6 +407,49 @@ const populateFromSpotify = (attr_prefix) => {
   setOptions("album_list", "album_wrapper", album, orig_album)
   setYear(releaseYear);
 
+}
+
+const bbc6GetCurrentTrack = () => {
+  url = "https://rms.api.bbc.co.uk/v2/services/bbc_6music/segments/latest?limit=1";
+  fetch(url, {
+    mode: "cors",
+    headers: {
+      Accept: "application/json",
+    },
+  })
+  .then((resp) => {
+    console.log(resp.status);
+    if (resp.status === 204) {
+      return null;
+    } else {
+      return resp.json();
+    }
+  })
+  .then((data) => {
+    if (data) {
+      populateFromBBC6(data[0]);
+    }
+  });
+}
+
+const populateFromBBC6 = (attr_prefix) => {
+  let orig_title = attr_prefix.title.secondary;
+  let title = ""
+  if (orig_title) {
+    // cut off " - ..." and " (..."
+    title = orig_title.replace(/ [-\(].*$/, "");
+  }    
+  setValue("title", title);
+  setOptions("title_list", "title_wrapper", title, orig_title)
+
+  let artist = attr_prefix.title.primary;
+  setValue("artist", artist);
+  setOptions("artist_list", "artist_wrapper", artist)
+
+  setValue("album", "");
+  setOptions("album_list", "album_wrapper", "", "")
+
+  setYear("");
 }
 
 const kexpGetCurrentTrack = () => {
