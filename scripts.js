@@ -15,6 +15,7 @@ const setValue = (id, value) => {
 
 const setOptions = (id, divId, ...options) => {
   const listEl = document.getElementById(id);
+  listEl.innerHTML = "";
   const uniqueOptions = [...new Set(options)];
   uniqueOptions.forEach(opt => {
     const optionEl = document.createElement("option");
