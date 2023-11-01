@@ -159,25 +159,25 @@ const openYouTubeAlbum = () => {
 
 const openWikiSong = (lang) => {
   if (lang) {
-    genAction(`http://www.wikipedia.org/search-redirect.php?language=${lang}&search=!TITLE!`);
+    genAction(`https://${lang}.wikipedia.org/wiki/Special:Search?search=!TITLE!`);
   } else {
-     genAction("http://www.wikipedia.org/search-redirect.php?search=!TITLE!");
+     genAction("https://en.wikipedia.org/wiki/Special:Search?search=!TITLE!");
   } 
 }
 
 const openWikiArtist = (lang) => {
   if (lang) {
-    genAction(`http://www.wikipedia.org/search-redirect.php?language=${lang}&search=!ARTIST!`);
+    genAction(`https://${lang}.wikipedia.org/wiki/Special:Search?search=!ARTIST!`);
   } else {
-    genAction("http://www.wikipedia.org/search-redirect.php?search=!ARTIST!");
+    genAction("https://en.wikipedia.org/wiki/Special:Search?search=!ARTIST!");
   }
 };
 
 const openWikiAlbum = (lang) => {
   if (lang) {
-    genAction(`http://www.wikipedia.org/search-redirect.php?language=${lang}&search=!ALBUM!`);
+    genAction(`https://${lang}.wikipedia.org/wiki/Special:Search?search=!ALBUM!`);
   } else {
-    genAction("http://www.wikipedia.org/search-redirect.php?search=!ALBUM!");
+    genAction("https://en.wikipedia.org/wiki/Special:Search?search=!ALBUM!");
   }
 };
 
