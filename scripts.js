@@ -159,9 +159,9 @@ const openYouTubeAlbum = () => {
 
 const openWikiSong = (lang) => {
   if (lang) {
-    genAction(`https://${lang}.wikipedia.org/wiki/Special:Search?search=!TITLE!`);
+    genAction(`https://${lang}.wikipedia.org/wiki/Special:Search?search=!TITLE!%20?ARTIST?`);
   } else {
-     genAction("https://en.wikipedia.org/wiki/Special:Search?search=!TITLE!");
+     genAction("https://en.wikipedia.org/wiki/Special:Search?search=!TITLE!%20?ARTIST?");
   } 
 }
 
@@ -175,9 +175,9 @@ const openWikiArtist = (lang) => {
 
 const openWikiAlbum = (lang) => {
   if (lang) {
-    genAction(`https://${lang}.wikipedia.org/wiki/Special:Search?search=!ALBUM!`);
+    genAction(`https://${lang}.wikipedia.org/wiki/Special:Search?search=!ALBUM!%20?ARTIST?`);
   } else {
-    genAction("https://en.wikipedia.org/wiki/Special:Search?search=!ALBUM!");
+    genAction("https://en.wikipedia.org/wiki/Special:Search?search=!ALBUM!%20?ARTIST?");
   }
 };
 
