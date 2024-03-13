@@ -575,3 +575,33 @@ const populateFromFluxFM = (attr_prefix) => {
   }
 
 }
+
+const checkForQueryParams = () => {
+  const hashString = window.location.hash.substring(1);
+  const keyValuePairs = hashString.split('&');
+  const paramsMap = {};
+  keyValuePairs.forEach(pair => {
+    const [key, value] = pair.split('=');
+    paramsMap[key] = value;
+  });
+  console.log(paramsMap);
+
+  const title = paramsMap['title'];
+  const artist = paramsMap['artist'];
+  const album = paramsMap['album'];
+  let gotParam = false;
+  if (title) {
+    gotParam = true;
+    document.getElementById("title").value = decodeURIComponent(title);
+  }
+  if (artist) {
+    gotParam = true;
+    document.getElementById("artist").value = decodeURIComponent(artist);
+  }
+  if (album) {
+    gotParam = true;
+    document.getElementById("album").value = decodeURIComponent(album);
+  }
+
+  return gotParam;
+}

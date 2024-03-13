@@ -153,7 +153,13 @@
     document.addEventListener('touchmove', function (e) { swipeMove(e); }, false);
     document.addEventListener('touchend', function (e) { swipeEnd(e); }, false);
 
-    spotifyCheckForCurrentTrack();
+    // Check for search params in URL
+    const gotParam = checkForQueryParams();
+    
+    console.log("gotParam: " + gotParam);
+    if (!gotParam) {
+      spotifyCheckForCurrentTrack();
+    }
   </script>
   <p>
     <div id="help-block" class="help-text">
