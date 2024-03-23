@@ -577,7 +577,17 @@ const populateFromFluxFM = (attr_prefix) => {
 }
 
 const checkForQueryParams = () => {
-  const paramsString = window.location.search.substring(1);
+  let paramsString = window.location.search.substring(1);
+  if (!paramsString) {
+    const hashString = window.location.hash.substring(1);
+    const queryIndex = hashString.indexOf('?');
+    if (queryIndex > -1) {
+      paramsString = hashString.substring(queryIndex + 1);
+    } else {
+      return false;
+    }
+  }
+  //console.log("paramsString: " + paramsString);
   const keyValuePairs = paramsString.split('&');
   const paramsMap = {};
   keyValuePairs.forEach(pair => {
