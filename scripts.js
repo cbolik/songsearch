@@ -480,6 +480,28 @@ const kexpGetCurrentTrack = () => {
   });
 }
 
+const starfmGetCurrentTrack = () => {
+  url = "https://api.streamabc.net/metadata/channel/30_vqtea82nbeon_wvxg.json";
+  fetch(url, {
+    headers: {
+      Accept: "application/json",
+    },
+  })
+  .then((resp) => {
+    console.log(resp.status);
+    if (resp.status === 204) {
+      return null;
+    } else {
+      return resp.json();
+    }
+  })
+  .then((data) => {
+    if (data) {
+      populateFromSTARFM(data);
+    }
+  });
+}
+
 const populateFromKEXP = (attr_prefix) => {
   let orig_title = attr_prefix.song;
   let title = ""
@@ -511,6 +533,26 @@ const populateFromKEXP = (attr_prefix) => {
     setYear("");
   }
 
+}
+
+const populateFromSTARFM = (current_track) => {
+  let orig_title = current_track.song;
+  let title = ""
+  if (orig_title) {
+    // cut off " - ..." and " (..."
+    title = orig_title.replace(/ [-\(].*$/, "");
+  }    
+  setValue("title", title);
+  setOptions("title_list", "title_wrapper", title, orig_title)
+
+  let artist = current_track.artist;
+  setValue("artist", artist);
+  setOptions("artist_list", "artist_wrapper", artist)
+
+  setValue("album", "");
+  setOptions("album_list", "album_wrapper", album, "")
+
+  setYear("");
 }
 
 const fluxfmGetCurrentTrack = (channelId) => {
