@@ -219,16 +219,44 @@ const openTwitter = () => {
   genAction("https://twitter.com/search?q=!ARTIST!");
 };
 
+const spotifyOpenOrSearch = (query) => {
+  query = replaceFieldInURL(query, "title");
+  if (query.length == 0) return;
+  query = replaceFieldInURL(query, "artist");
+  if (query.length == 0) return;
+  query = replaceFieldInURL(query, "album");
+  if (query.length == 0) return;
+
+  const webUrl = `https://open.spotify.com/search/${query}`;
+  const appUrl = `spotify:search:${query}`;
+
+  if (isMobileOrTablet()) {
+    // On mobile, use web URL (app URL doesn't work reliably in mobile browsers)
+    window.location = webUrl;
+  } else {
+    // On desktop, try to open the Spotify app
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = appUrl;
+    document.body.appendChild(iframe);
+
+    // Clean up iframe after the URI scheme has been processed
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 1000);
+  }
+}
+
 const spotifySearch = () => {
-  genAction("https://open.spotify.com/search/!TITLE!%20?ARTIST?");
+  spotifyOpenOrSearch("!TITLE!%20?ARTIST?");
 }
 
 const spotifySearchArtist = () => {
-  genAction("https://open.spotify.com/search/!ARTIST!");
+  spotifyOpenOrSearch("!ARTIST!");
 }
 
 const spotifySearchAlbum = () => {
-  genAction("https://open.spotify.com/search/!ALBUM!%20?ARTIST?");
+  spotifyOpenOrSearch("!ALBUM!%20?ARTIST?");
 }
 
 const enterPressed = (event) => {
@@ -411,9 +439,11 @@ const populateFromSpotify = (attr_prefix) => {
 }
 
 const bbc6GetCurrentTrack = () => {
-  url = "https://rms.api.bbc.co.uk/v2/services/bbc_6music/segments/latest?limit=1";
+  // Use CORS proxy to bypass CORS restrictions on GitHub Pages
+  const corsProxy = "https://corsproxy.io/?";
+  url = corsProxy + encodeURIComponent("https://rms.api.bbc.co.uk/v2/services/bbc_6music/segments/latest?limit=1");
+  console.log(url);
   fetch(url, {
-    mode: "cors",
     headers: {
       Accept: "application/json",
     },
@@ -427,14 +457,21 @@ const bbc6GetCurrentTrack = () => {
     }
   })
   .then((data) => {
-    if (data) {
+    if (data && data.data && data.data.length > 0) {
+      populateFromBBC6(data.data[0]);
+    } else if (data && data.length > 0) {
       populateFromBBC6(data[0]);
+    } else {
+      console.error("Unexpected BBC Radio 6 response structure:", data);
     }
+  })
+  .catch((error) => {
+    console.error("Error fetching BBC Radio 6 data:", error);
   });
 }
 
 const populateFromBBC6 = (attr_prefix) => {
-  let orig_title = attr_prefix.title.secondary;
+  let orig_title = attr_prefix.titles.secondary;
   let title = ""
   if (orig_title) {
     // cut off " - ..." and " (..."
@@ -443,7 +480,7 @@ const populateFromBBC6 = (attr_prefix) => {
   setValue("title", title);
   setOptions("title_list", "title_wrapper", title, orig_title)
 
-  let artist = attr_prefix.title.primary;
+  let artist = attr_prefix.titles.primary;
   setValue("artist", artist);
   setOptions("artist_list", "artist_wrapper", artist)
 

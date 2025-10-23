@@ -50,3 +50,9 @@ The app uses a template system for generating search URLs with placeholders:
 - Spotify client ID is base64 encoded in `scripts.js`
 - Redirect URI is dynamically generated based on current location
 - Local storage keys for OAuth state management
+
+# DevOps
+- To publish changes do the following:
+  - commit the changes with a descriptive message
+  - push to master
+  - then push to gh-pages: `git subtree push --prefix public origin gh-pages``
