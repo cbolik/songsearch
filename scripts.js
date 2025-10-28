@@ -289,23 +289,22 @@ const hideHelp = () => {
 };
 
 /**
- * Obtains parameters from the hash of the current URL.
- * Used for Spotify API's Implicit Grant flow.
+ * Obtains parameters from the query string of the current URL.
+ * Used for Spotify API's Authorization Code with PKCE flow.
  * @return Object
  */
-const getHashParams = () => {
-  let hashParams = {};
-  let e, r = /([^&;=]+)=?([^&;]*)/g,
-      q = window.location.hash.substring(1);
-  while ( e = r.exec(q)) {
-      hashParams[e[1]] = decodeURIComponent(e[2]);
-  }
-  return hashParams;
-}
+const getQueryParams = () => {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    code: params.get('code'),
+    state: params.get('state'),
+    error: params.get('error')
+  };
+};
 
 /**
  * Generates a random string containing numbers and letters
- * Used for Spotify API's Implicit Grant flow.
+ * Used for Spotify API state parameter.
  * @param  {number} length The length of the string
  * @return {string} The generated string
  */
@@ -319,73 +318,229 @@ const generateRandomString = (length) => {
   return text;
 };
 
+/**
+ * Base64URL encoding helper (no padding, URL-safe)
+ * Used for PKCE code verifier and challenge encoding.
+ * @param  {Uint8Array} buffer The buffer to encode
+ * @return {string} The base64url encoded string
+ */
+const base64URLEncode = (buffer) => {
+  const base64 = btoa(String.fromCharCode(...buffer));
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+};
+
+/**
+ * Generate PKCE code verifier (cryptographically random, 43-128 chars)
+ * @return {string} The code verifier
+ */
+const generateCodeVerifier = () => {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return base64URLEncode(array);
+};
+
+/**
+ * Generate PKCE code challenge from verifier (SHA-256 hash, base64url encoded)
+ * @param  {string} verifier The code verifier
+ * @return {Promise<string>} The code challenge
+ */
+const generateCodeChallenge = async (verifier) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return base64URLEncode(new Uint8Array(hash));
+};
+
 const getRedirectURI = (loc) => {
   let uri = loc.origin + loc.pathname;
   return uri.replace(/\/$/, "");
 }
 
-const SPOTIFY_CLIENT_ID = "MmQ3MzQyZjg2MTdmNGVhNmFmMmM4ODRjYTcwZTJiNDA=";
+const SPOTIFY_CLIENT_ID = atob("MmQ3MzQyZjg2MTdmNGVhNmFmMmM4ODRjYTcwZTJiNDA=");
 const SPOTIFY_REDIRECT_URI = getRedirectURI(window.location);
 const SPOTIFY_STATE_KEY = "spotify_auth_state";
+const SPOTIFY_CODE_VERIFIER_KEY = "spotify_code_verifier";
+const SPOTIFY_ACCESS_TOKEN_KEY = "spotify_access_token";
 const SPOTIFY_USED_KEY = "spotify_used";
 
-const spotifyCheckForCurrentTrack = () => {
-  let params = getHashParams();
-
-  let access_token = params.access_token,
-    state = params.state,
-    storedState = localStorage.getItem(SPOTIFY_STATE_KEY);
-
-  if (access_token && state != null && state === storedState) {
-    localStorage.removeItem(SPOTIFY_STATE_KEY); 
-    // get currently playing track
-    let url = "https://api.spotify.com/v1/me/player/currently-playing";
-    url += "?market=from_token";
-    fetch(url, {
-      headers: {
-        Authorization: "Bearer " + access_token,
-        Accept: "application/json"
-      },
+/**
+ * Exchange authorization code for access token using PKCE
+ * @param  {string} code The authorization code from Spotify
+ * @param  {string} codeVerifier The PKCE code verifier
+ * @return {Promise<Object>} Token data including access_token
+ */
+const exchangeCodeForToken = async (code, codeVerifier) => {
+  const response = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: SPOTIFY_REDIRECT_URI,
+      client_id: SPOTIFY_CLIENT_ID,
+      code_verifier: codeVerifier
     })
-      .then((resp) => {
-        if (resp.status === 204) {
-          localStorage.setItem(SPOTIFY_USED_KEY, true);
-          return null;
-        } else {
-          return resp.json();
-        }
-      })
-      .then((data) => {
-        localStorage.setItem(SPOTIFY_USED_KEY, true);
-        if (data) {
-          populateFromSpotify(data.item);
-        } else {
-          spotifyCheckLastPlayedTrack(access_token);
-        }
-      });
+  });
+
+  if (!response.ok) {
+    throw new Error(`Token exchange failed: ${response.status}`);
+  }
+
+  return await response.json();
+};
+
+const spotifyCheckForCurrentTrack = async () => {
+  const params = getQueryParams();
+
+  const code = params.code;
+  const state = params.state;
+  const error = params.error;
+  const storedState = localStorage.getItem(SPOTIFY_STATE_KEY);
+  const codeVerifier = localStorage.getItem(SPOTIFY_CODE_VERIFIER_KEY);
+
+  // Handle authorization errors
+  if (error) {
+    console.error("Spotify authorization error:", error);
+    localStorage.removeItem(SPOTIFY_STATE_KEY);
+    localStorage.removeItem(SPOTIFY_CODE_VERIFIER_KEY);
+    return;
+  }
+
+  // If we have a code, exchange it for a token
+  if (code && state != null && state === storedState && codeVerifier) {
+    // Clean up stored values
+    localStorage.removeItem(SPOTIFY_STATE_KEY);
+    localStorage.removeItem(SPOTIFY_CODE_VERIFIER_KEY);
+
+    try {
+      // Exchange authorization code for access token
+      const tokenData = await exchangeCodeForToken(code, codeVerifier);
+      const access_token = tokenData.access_token;
+
+      // Store token in sessionStorage for reuse during this browser session
+      sessionStorage.setItem(SPOTIFY_ACCESS_TOKEN_KEY, access_token);
+
+      // Get currently playing track
+      await fetchCurrentlyPlayingTrack(access_token);
+
+      // Clean up URL by removing query parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+    } catch (err) {
+      console.error("Error during token exchange or API call:", err);
+      sessionStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+    }
   } else {
-    if (localStorage.getItem(SPOTIFY_USED_KEY)) {
-      // Spotify used previously, trying to obtain token
-      localStorage.removeItem(SPOTIFY_USED_KEY); // remove to avoid infinite loop
+    // Check if we have a stored access token
+    const storedToken = sessionStorage.getItem(SPOTIFY_ACCESS_TOKEN_KEY);
+    if (storedToken) {
+      // Try to use stored token
+      try {
+        await fetchCurrentlyPlayingTrack(storedToken);
+      } catch (err) {
+        // Token might be expired, clear it and request new authorization
+        console.error("Stored token invalid:", err);
+        sessionStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+        if (localStorage.getItem(SPOTIFY_USED_KEY)) {
+          localStorage.removeItem(SPOTIFY_USED_KEY);
+          spotifyGetAccessToken();
+        }
+      }
+    } else if (localStorage.getItem(SPOTIFY_USED_KEY)) {
+      // Spotify used previously, trying to obtain new token
+      localStorage.removeItem(SPOTIFY_USED_KEY);
       spotifyGetAccessToken();
     }
   }
-}
+};
 
-const spotifyGetAccessToken = () => {
-  // authorize user and get access token
-  let scope = "user-read-currently-playing user-read-recently-played";
-  let url = "https://accounts.spotify.com/authorize";
-  let state = generateRandomString(16);
+/**
+ * Fetch currently playing or recently played track from Spotify
+ * @param {string} access_token The Spotify access token
+ */
+const fetchCurrentlyPlayingTrack = async (access_token) => {
+  let url = "https://api.spotify.com/v1/me/player/currently-playing";
+  url += "?market=from_token";
+  const resp = await fetch(url, {
+    headers: {
+      Authorization: "Bearer " + access_token,
+      Accept: "application/json"
+    }
+  });
+
+  if (resp.status === 401) {
+    // Token expired or invalid
+    throw new Error("Token expired");
+  }
+
+  localStorage.setItem(SPOTIFY_USED_KEY, true);
+
+  if (resp.status === 204) {
+    // Nothing playing, try recently played
+    await spotifyCheckLastPlayedTrack(access_token);
+  } else {
+    const data = await resp.json();
+    if (data && data.item) {
+      populateFromSpotify(data.item);
+    } else {
+      await spotifyCheckLastPlayedTrack(access_token);
+    }
+  }
+};
+
+/**
+ * Main entry point for getting current track from Spotify
+ * Checks for stored token first, otherwise initiates authorization
+ */
+const spotifyGetCurrentTrack = async () => {
+  const storedToken = sessionStorage.getItem(SPOTIFY_ACCESS_TOKEN_KEY);
+
+  if (storedToken) {
+    // Try to use stored token
+    try {
+      await fetchCurrentlyPlayingTrack(storedToken);
+    } catch (err) {
+      // Token expired or invalid, clear it and request new authorization
+      console.log("Stored token invalid, requesting new authorization");
+      sessionStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+      await spotifyGetAccessToken();
+    }
+  } else {
+    // No stored token, start authorization flow
+    await spotifyGetAccessToken();
+  }
+};
+
+const spotifyGetAccessToken = async () => {
+  // authorize user using PKCE flow
+  const scope = "user-read-currently-playing user-read-recently-played";
+  const state = generateRandomString(16);
+
+  // Generate PKCE parameters
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+  // Store state and verifier for callback validation
   localStorage.setItem(SPOTIFY_STATE_KEY, state);
+  localStorage.setItem(SPOTIFY_CODE_VERIFIER_KEY, codeVerifier);
 
-  url += "?response_type=token";
-  url += "&client_id=" + encodeURIComponent(atob(SPOTIFY_CLIENT_ID));
+  // Build authorization URL with PKCE parameters
+  let url = "https://accounts.spotify.com/authorize";
+  url += "?response_type=code";
+  url += "&client_id=" + encodeURIComponent(SPOTIFY_CLIENT_ID);
   url += "&scope=" + encodeURIComponent(scope);
   url += "&redirect_uri=" + encodeURIComponent(SPOTIFY_REDIRECT_URI);
   url += "&state=" + encodeURIComponent(state);
+  url += "&code_challenge=" + encodeURIComponent(codeChallenge);
+  url += "&code_challenge_method=S256";
+
   window.location = url;
-}
+};
 
 const spotifyCheckLastPlayedTrack = (access_token) => {
   // try to get recently played tracks
