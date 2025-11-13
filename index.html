@@ -40,12 +40,6 @@
 <body>
   <div class="banner" id="top">
     <h1>Song Search</h1>
-    <div class="buttons">
-      <!--
-      <input type="button" id="reset" onclick="resetFields()" value="Clear" tabindex="-1">
-      -->
-      <input type="button" id="help" onclick="showHelp()" value="Help" tabindex="-1">
-    </div>
   </div>
   <form>
     <div class="spotify">
@@ -140,8 +134,12 @@
       </div>
     </div>
   </form>
+  <div class="buttons">
+    <input type="button" id="spotify_signout" onclick="spotifySignOut()" value="Sign Out (Spotify)" tabindex="-1">
+    <input type="button" id="help" onclick="showHelp()" value="Help" tabindex="-1">
+  </div>
   <div class="copyright">
-    Copyright &copy; 2023 Christian Bolik 
+    Copyright &copy; 2023 Christian Bolik
   </div>
 
   <script>
