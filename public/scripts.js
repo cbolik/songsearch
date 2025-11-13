@@ -278,6 +278,12 @@ const resetFields = () => {
   document.getElementById("year").style.display = "none";
 };
 
+const spotifySignOut = () => {
+  clearStoredTokens();
+  localStorage.removeItem(SPOTIFY_USED_KEY);
+  alert("Signed out from Spotify. You'll need to authorize again on next use.");
+};
+
 const showHelp = () => {
   document.getElementById("help-block").style.display = "block";
   window.location = "#help-block";
@@ -364,13 +370,15 @@ const SPOTIFY_REDIRECT_URI = getRedirectURI(window.location);
 const SPOTIFY_STATE_KEY = "spotify_auth_state";
 const SPOTIFY_CODE_VERIFIER_KEY = "spotify_code_verifier";
 const SPOTIFY_ACCESS_TOKEN_KEY = "spotify_access_token";
+const SPOTIFY_REFRESH_TOKEN_KEY = "spotify_refresh_token";
+const SPOTIFY_TOKEN_EXPIRY_KEY = "spotify_token_expiry";
 const SPOTIFY_USED_KEY = "spotify_used";
 
 /**
  * Exchange authorization code for access token using PKCE
  * @param  {string} code The authorization code from Spotify
  * @param  {string} codeVerifier The PKCE code verifier
- * @return {Promise<Object>} Token data including access_token
+ * @return {Promise<Object>} Token data including access_token and refresh_token
  */
 const exchangeCodeForToken = async (code, codeVerifier) => {
   const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -392,6 +400,98 @@ const exchangeCodeForToken = async (code, codeVerifier) => {
   }
 
   return await response.json();
+};
+
+/**
+ * Refresh the access token using the stored refresh token
+ * @return {Promise<Object>} New token data including access_token
+ */
+const refreshAccessToken = async () => {
+  const refreshToken = localStorage.getItem(SPOTIFY_REFRESH_TOKEN_KEY);
+
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
+  }
+
+  const response = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: SPOTIFY_CLIENT_ID
+    })
+  });
+
+  if (!response.ok) {
+    // Refresh token invalid/expired, need to re-authorize
+    clearStoredTokens();
+    throw new Error('Refresh token expired');
+  }
+
+  return await response.json();
+};
+
+/**
+ * Store token data in sessionStorage and localStorage
+ * @param {Object} tokenData Token response from Spotify
+ */
+const storeTokenData = (tokenData) => {
+  // Store access token in sessionStorage
+  sessionStorage.setItem(SPOTIFY_ACCESS_TOKEN_KEY, tokenData.access_token);
+
+  // Store refresh token in localStorage (persists across sessions)
+  if (tokenData.refresh_token) {
+    localStorage.setItem(SPOTIFY_REFRESH_TOKEN_KEY, tokenData.refresh_token);
+  }
+
+  // Store expiry time (current time + expires_in seconds)
+  const expiryTime = Date.now() + (tokenData.expires_in * 1000);
+  localStorage.setItem(SPOTIFY_TOKEN_EXPIRY_KEY, expiryTime.toString());
+};
+
+/**
+ * Clear all stored tokens
+ */
+const clearStoredTokens = () => {
+  sessionStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+  localStorage.removeItem(SPOTIFY_REFRESH_TOKEN_KEY);
+  localStorage.removeItem(SPOTIFY_TOKEN_EXPIRY_KEY);
+};
+
+/**
+ * Check if token needs refresh and refresh if necessary
+ * @return {Promise<string>} Valid access token
+ */
+const refreshTokenIfNeeded = async () => {
+  const storedToken = sessionStorage.getItem(SPOTIFY_ACCESS_TOKEN_KEY);
+  const expiryTime = localStorage.getItem(SPOTIFY_TOKEN_EXPIRY_KEY);
+  const refreshToken = localStorage.getItem(SPOTIFY_REFRESH_TOKEN_KEY);
+
+  if (!refreshToken) {
+    // No refresh token available, return stored token or null
+    return storedToken;
+  }
+
+  const now = Date.now();
+
+  // Refresh 5 minutes before expiry (300000ms = 5 minutes)
+  if (expiryTime && (now + 300000) >= parseInt(expiryTime)) {
+    console.log('Token expiring soon, refreshing...');
+    try {
+      const newTokenData = await refreshAccessToken();
+      storeTokenData(newTokenData);
+      return newTokenData.access_token;
+    } catch (err) {
+      console.error('Token refresh failed:', err);
+      // Fall back to stored token if refresh fails
+      return storedToken;
+    }
+  }
+
+  return storedToken;
 };
 
 const spotifyCheckForCurrentTrack = async () => {
@@ -420,20 +520,19 @@ const spotifyCheckForCurrentTrack = async () => {
     try {
       // Exchange authorization code for access token
       const tokenData = await exchangeCodeForToken(code, codeVerifier);
-      const access_token = tokenData.access_token;
 
-      // Store token in sessionStorage for reuse during this browser session
-      sessionStorage.setItem(SPOTIFY_ACCESS_TOKEN_KEY, access_token);
+      // Store tokens and expiry
+      storeTokenData(tokenData);
 
       // Get currently playing track
-      await fetchCurrentlyPlayingTrack(access_token);
+      await fetchCurrentlyPlayingTrack(tokenData.access_token);
 
       // Clean up URL by removing query parameters
       window.history.replaceState({}, document.title, window.location.pathname);
 
     } catch (err) {
       console.error("Error during token exchange or API call:", err);
-      sessionStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+      clearStoredTokens();
     }
   } else {
     // Check if we have a stored access token
@@ -445,7 +544,7 @@ const spotifyCheckForCurrentTrack = async () => {
       } catch (err) {
         // Token might be expired, clear it and request new authorization
         console.error("Stored token invalid:", err);
-        sessionStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+        clearStoredTokens();
         if (localStorage.getItem(SPOTIFY_USED_KEY)) {
           localStorage.removeItem(SPOTIFY_USED_KEY);
           spotifyGetAccessToken();
@@ -495,23 +594,30 @@ const fetchCurrentlyPlayingTrack = async (access_token) => {
 
 /**
  * Main entry point for getting current track from Spotify
- * Checks for stored token first, otherwise initiates authorization
+ * Checks for stored token first, refreshes if needed, otherwise initiates authorization
  */
 const spotifyGetCurrentTrack = async () => {
-  const storedToken = sessionStorage.getItem(SPOTIFY_ACCESS_TOKEN_KEY);
+  try {
+    // Check if we have a token and refresh if needed
+    const validToken = await refreshTokenIfNeeded();
 
-  if (storedToken) {
-    // Try to use stored token
-    try {
-      await fetchCurrentlyPlayingTrack(storedToken);
-    } catch (err) {
-      // Token expired or invalid, clear it and request new authorization
-      console.log("Stored token invalid, requesting new authorization");
-      sessionStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+    if (validToken) {
+      // Try to use the token
+      try {
+        await fetchCurrentlyPlayingTrack(validToken);
+      } catch (err) {
+        // Token invalid despite refresh, need to re-authorize
+        console.log("Token invalid, requesting new authorization");
+        clearStoredTokens();
+        await spotifyGetAccessToken();
+      }
+    } else {
+      // No token available, start authorization flow
       await spotifyGetAccessToken();
     }
-  } else {
-    // No stored token, start authorization flow
+  } catch (err) {
+    console.error("Error in spotifyGetCurrentTrack:", err);
+    // Fall back to authorization
     await spotifyGetAccessToken();
   }
 };
