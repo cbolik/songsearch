@@ -439,24 +439,40 @@ const refreshAccessToken = async () => {
  * @param {Object} tokenData Token response from Spotify
  */
 const storeTokenData = (tokenData) => {
-  // Store access token in sessionStorage
+  console.log('[Spotify Auth] Storing tokens', {
+    hasAccessToken: !!tokenData.access_token,
+    hasRefreshToken: !!tokenData.refresh_token,
+    expiresIn: tokenData.expires_in
+  });
+
+  // Store access token in both sessionStorage and localStorage
+  // sessionStorage for current session, localStorage as fallback for mobile
   sessionStorage.setItem(SPOTIFY_ACCESS_TOKEN_KEY, tokenData.access_token);
+  localStorage.setItem(SPOTIFY_ACCESS_TOKEN_KEY, tokenData.access_token);
 
   // Store refresh token in localStorage (persists across sessions)
   if (tokenData.refresh_token) {
     localStorage.setItem(SPOTIFY_REFRESH_TOKEN_KEY, tokenData.refresh_token);
+    console.log('[Spotify Auth] Refresh token stored in localStorage');
+  } else {
+    console.warn('[Spotify Auth] No refresh token in response - will require re-auth when access token expires');
   }
 
   // Store expiry time (current time + expires_in seconds)
   const expiryTime = Date.now() + (tokenData.expires_in * 1000);
   localStorage.setItem(SPOTIFY_TOKEN_EXPIRY_KEY, expiryTime.toString());
+
+  const expiryDate = new Date(expiryTime);
+  console.log('[Spotify Auth] Token expires at:', expiryDate.toLocaleString());
 };
 
 /**
  * Clear all stored tokens
  */
 const clearStoredTokens = () => {
+  console.log('[Spotify Auth] Clearing all stored tokens');
   sessionStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
+  localStorage.removeItem(SPOTIFY_ACCESS_TOKEN_KEY);
   localStorage.removeItem(SPOTIFY_REFRESH_TOKEN_KEY);
   localStorage.removeItem(SPOTIFY_TOKEN_EXPIRY_KEY);
 };
@@ -466,12 +482,25 @@ const clearStoredTokens = () => {
  * @return {Promise<string>} Valid access token
  */
 const refreshTokenIfNeeded = async () => {
-  const storedToken = sessionStorage.getItem(SPOTIFY_ACCESS_TOKEN_KEY);
+  // Try sessionStorage first, fall back to localStorage (for mobile)
+  let storedToken = sessionStorage.getItem(SPOTIFY_ACCESS_TOKEN_KEY);
+  if (!storedToken) {
+    storedToken = localStorage.getItem(SPOTIFY_ACCESS_TOKEN_KEY);
+    console.log('[Spotify Auth] Access token not in sessionStorage, using localStorage');
+  }
+
   const expiryTime = localStorage.getItem(SPOTIFY_TOKEN_EXPIRY_KEY);
   const refreshToken = localStorage.getItem(SPOTIFY_REFRESH_TOKEN_KEY);
 
+  console.log('[Spotify Auth] Token status:', {
+    hasAccessToken: !!storedToken,
+    hasRefreshToken: !!refreshToken,
+    hasExpiryTime: !!expiryTime,
+    expiryTime: expiryTime ? new Date(parseInt(expiryTime)).toLocaleString() : 'none'
+  });
+
   if (!refreshToken) {
-    // No refresh token available, return stored token or null
+    console.warn('[Spotify Auth] No refresh token available - will need re-auth when token expires');
     return storedToken;
   }
 
@@ -479,17 +508,20 @@ const refreshTokenIfNeeded = async () => {
 
   // Refresh 5 minutes before expiry (300000ms = 5 minutes)
   if (expiryTime && (now + 300000) >= parseInt(expiryTime)) {
-    console.log('Token expiring soon, refreshing...');
+    console.log('[Spotify Auth] Token expiring soon, refreshing...');
     try {
       const newTokenData = await refreshAccessToken();
       storeTokenData(newTokenData);
       return newTokenData.access_token;
     } catch (err) {
-      console.error('Token refresh failed:', err);
+      console.error('[Spotify Auth] Token refresh failed:', err);
       // Fall back to stored token if refresh fails
       return storedToken;
     }
   }
+
+  const minutesUntilExpiry = expiryTime ? Math.floor((parseInt(expiryTime) - now) / 60000) : null;
+  console.log('[Spotify Auth] Token valid for', minutesUntilExpiry, 'more minutes');
 
   return storedToken;
 };
